@@ -2,44 +2,54 @@ package org.example.dijsktra;
 
 import java.util.*;
 
-import com.google.common.base.Objects;
-
-
-
-
 public class Graph<T> {
-    
+
     private LinkedList<Vertex<T>> listVertex;
     private LinkedList<Edge<T>> listEdges;
+
+    private Map<Vertex<T>, Map<Vertex<T>, List<Vertex<T>>>> dijkstraCache;
+    private boolean isChangedCache;
+
     public int vCant, eCant;
-    
-    public Graph(){
+
+    public Graph() {
         listVertex = new LinkedList<>();
         listEdges = new LinkedList<>();
         vCant = 0;
         eCant = 0;
+        dijkstraCache = new HashMap<>();
+        isChangedCache = false;
     }
-    public void addVertex(T info){ listVertex.add(new Vertex<T>(info)); vCant++;};
-    private void addVertex(Vertex<T> vertex){ listVertex.add(vertex); vCant++;};
+
+    public void addVertex(T info) {
+        this.addVertex(new Vertex<T>(info));
+    }
+
+    private void addVertex(Vertex<T> vertex) {
+        listVertex.add(vertex);
+        vCant++;
+        isChangedCache = true;
+    }
+
     public void addEdge(T oring, T dest, int w) {
-        
         Vertex<T> tail = findVertex(oring);
         Vertex<T> head = findVertex(dest);
-    
+
         if (tail == null) {
             tail = new Vertex<T>(oring);
             addVertex(tail);
         }
-    
+
         if (head == null) {
             head = new Vertex<T>(dest);
             addVertex(head);
         }
-    
+
         tail.addEdge(head, w);
         eCant++;
+        isChangedCache = true;
     }
-    
+
     public Vertex<T> findVertex(T info) {
         for (Vertex<T> vertex : listVertex) {
             if (vertex.getInfo().equals(info)) {
@@ -48,7 +58,8 @@ public class Graph<T> {
         }
         return null;
     }
-    public int posVertex(T info){
+
+    public int posVertex(T info) {
         int pos = 0;
         for (Vertex<T> vertex : listVertex) {
             if (vertex.getInfo().equals(info)) {
@@ -58,17 +69,29 @@ public class Graph<T> {
         }
         return -1;
     }
-    
-    public LinkedList<Vertex<T>> getVertexs(){return listVertex;}
-    public LinkedList<Edge<T>> getEdges(){return listEdges;}
 
-    public Map<Vertex<T>, List<Vertex<T>>> dijkstra(T init){
+    public LinkedList<Vertex<T>> getVertexs() {
+        return listVertex;
+    }
+
+    public Map<Vertex<T>, List<Vertex<T>>> dijkstra(T init) {
+        Vertex<T> startVertex = findVertex(init);
+        // TODO: check if startVertex is null, raise exception
+        if (startVertex == null) {
+            return new HashMap<>();
+        }
+
+        if (!isChangedCache && dijkstraCache.containsKey(startVertex)) {
+            System.out.println("dijkstraCache");
+            return dijkstraCache.getOrDefault(startVertex, new HashMap<>());
+        }
+
         Map<Vertex<T>, Integer> distances = new HashMap<>();
         Map<Vertex<T>, Vertex<T>> previus = new HashMap<>();
-        
-        PriorityQueue<Vertex<T>> pq = new PriorityQueue<>(Comparator.comparingInt(distances::get));
 
-        Vertex<T> startVertex = findVertex(init);
+        PriorityQueue<Vertex<T>> pq = new PriorityQueue<>(
+            Comparator.comparingInt(distances::get)
+        );
 
         for (Vertex<T> vertex : listVertex) {
             if (vertex.equals(startVertex)) {
@@ -82,65 +105,68 @@ public class Graph<T> {
         while (!pq.isEmpty()) {
             Vertex<T> current = pq.poll();
 
-            for(Edge<T> edge : current.getEdgeList()){
+            for (Edge<T> edge : current.getEdgeList()) {
                 Vertex<T> neighbor = edge.getDestiny();
                 int newDist = distances.get(current) + edge.getWeight();
 
-                if(newDist < distances.get(neighbor)){
+                if (newDist < distances.get(neighbor)) {
                     distances.put(neighbor, newDist);
                     previus.put(neighbor, current);
                     pq.remove(neighbor);
                     pq.add(neighbor);
                 }
-
             }
         }
 
         Map<Vertex<T>, List<Vertex<T>>> path = new HashMap<>();
-        for(Vertex<T> end : listVertex){
+        for (Vertex<T> end : listVertex) {
             path.put(end, reconstructionList(previus, startVertex, end));
         }
 
-        return path;
-}
-    
-
-    private List<Vertex<T>> reconstructionList(Map<Vertex<T>, Vertex<T>> previous, Vertex<T> start, Vertex<T> end){
-        List<Vertex<T>> path = new LinkedList<>();
-        
-        if (!previous.containsKey(end) && !start.equals(end)) return path;
-
-        for (Vertex<T> vertex = end; vertex != null; vertex = previous.get(vertex))
-            path.add(0, vertex);
-        
+        dijkstraCache.put(startVertex, path);
+        isChangedCache = false;
         return path;
     }
 
+    private List<Vertex<T>> reconstructionList(
+        Map<Vertex<T>, Vertex<T>> previous,
+        Vertex<T> start,
+        Vertex<T> end
+    ) {
+        List<Vertex<T>> path = new LinkedList<>();
+
+        if (!previous.containsKey(end) && !start.equals(end)) return path;
+
+        for (
+            Vertex<T> vertex = end;
+            vertex != null;
+            vertex = previous.get(vertex)
+        ) path.add(0, vertex);
+
+        return path;
+    }
 
     public void initializeGraph(int numVertices, int numEdges) {
         Random random = new Random();
 
-        
         for (int i = 1; i <= numVertices; i++) {
             addVertex((T) ("V" + i));
         }
 
         // Agregar m aristas aleatorias con pesos aleatorios entre 1 y 10
         for (int i = 0; i < numEdges; i++) {
-            int originIndex = random.nextInt(numVertices);  // Índice aleatorio para el vértice de origen
-            int destIndex = random.nextInt(numVertices);    // Índice aleatorio para el vértice de destino
+            int originIndex = random.nextInt(numVertices); // Índice aleatorio para el vértice de origen
+            int destIndex = random.nextInt(numVertices); // Índice aleatorio para el vértice de destino
 
-            if (originIndex != destIndex) {  // Evitar lazos
+            if (originIndex != destIndex) { // Evitar lazos
                 T origin = listVertex.get(originIndex).getInfo();
                 T dest = listVertex.get(destIndex).getInfo();
-                int weight = random.nextInt(10) + 1;  // Peso aleatorio entre 1 y 10
+                int weight = random.nextInt(10) + 1; // Peso aleatorio entre 1 y 10
                 addEdge(origin, dest, weight);
             }
         }
     }
 }
-
-
 /* public void addEdge(T oring, T dest, int w){
         for(Iterator<Edge<T>> itr = listEdges.iterator(); itr.hasNext();){
             Edge<T> edge = itr.next();
