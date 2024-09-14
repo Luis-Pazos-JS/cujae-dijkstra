@@ -7,16 +7,66 @@ import org.example.dijsktra.Graph;
 
 public class App {
 
-    public String getGreeting() {
-        return "Hello World!";
+    public static void show_graph(Graph<String> myGraph) {
+        var nVector = myGraph.vCant;
+        String[][] table = new String[nVector + 1][nVector + 1];
+        // Header
+        for (int i = 0; i < nVector + 1; i++) {
+            for (int j = 0; j < nVector + 1; j++) {
+                table[i][j] = "----";
+            }
+        }
+        table[0][0] = "VERT";
+
+        // Drawing columns
+        for (int i = 0; i < nVector; i++) {
+            var vertex = myGraph.getVertexs().get(i);
+            table[0][i + 1] = vertex.getInfo();
+            table[i + 1][0] = vertex.getInfo();
+        }
+
+        //Table formatting
+        System.out.println(myGraph.vCant);
+        for (int i = 0; i < nVector; i++) {
+            var vertex = myGraph.getVertexs().get(i);
+            for (int j = 0; j < vertex.getEdgeList().size(); j++) {
+                var edge = vertex.getEdgeList().get(j);
+                int pos = myGraph.posVertex(edge.getDestiny().getInfo());
+                table[i + 1][pos + 1] = edge.getDestiny().getInfo() +
+                "-" +
+                edge.getWeight();
+            }
+        }
+
+        // Showing table
+        for (int i = 0; i < nVector + 1; i++) {
+            for (int j = 0; j < nVector + 1; j++) {
+                System.out.print(String.format("%-5s", table[i][j]) + " | "); // Formato a 5 caracteres
+            }
+            System.out.println();
+        }
+
+        System.out.println(); // For endl
+    }
+
+    public static void show_dijkstra(Graph<String> myGraph, String vertexInfo) {
+        var paths = myGraph.dijkstra(vertexInfo);
+
+        // Mostrar caminos
+        System.out.println("Distancias desde el vértice  V1:");
+        for (var vertex : myGraph.getVertexs()) {
+            System.out.print(vertex.getInfo());
+            for (var pa : paths.get(vertex).second()) {
+                System.out.print("  " + pa.getInfo() + " |  ");
+            }
+            System.out.println();
+        }
+
+        System.out.println();
     }
 
     public static void main(String[] args) {
         Graph<String> myGraph = new Graph<>();
-        int nVector = 5;
-        int nEdges = 10;
-
-        //myGraph.initializeGraph(nVector, nEdges);
 
         myGraph.addVertex("V1");
         myGraph.addVertex("V2");
@@ -34,88 +84,16 @@ public class App {
         myGraph.addEdge("V2", "V1", 8);
         myGraph.addEdge("V2", "V1", -8);
 
-        nVector = myGraph.vCant;
+        show_graph(myGraph);
 
-        String[][] table = new String[nVector + 1][nVector + 1];
-        for (int i = 0; i < nVector + 1; i++) {
-            for (int j = 0; j < nVector + 1; j++) {
-                table[i][j] = "----";
-            }
-        }
-        table[0][0] = "VERT";
-
-        for (int i = 0; i < nVector; i++) {
-            var vertex = myGraph.getVertexs().get(i);
-            table[0][i + 1] = vertex.getInfo();
-            table[i + 1][0] = vertex.getInfo();
-        }
-
-        //Show
-        System.out.println(myGraph.vCant);
-        for (int i = 0; i < nVector; i++) {
-            var vertex = myGraph.getVertexs().get(i);
-            for (int j = 0; j < vertex.getEdgeList().size(); j++) {
-                var edge = vertex.getEdgeList().get(j);
-                int pos = myGraph.posVertex(edge.getDestiny().getInfo());
-                table[i + 1][pos + 1] = edge.getDestiny().getInfo() +
-                "-" +
-                edge.getWeight();
-            }
-        }
-
-        for (int i = 0; i < nVector + 1; i++) {
-            for (int j = 0; j < nVector + 1; j++) {
-                System.out.print(String.format("%-5s", table[i][j]) + " | "); // Formato a 5 caracteres
-            }
-            System.out.println();
-        }
-        System.out.println();
-        var paths = myGraph.dijkstra("V1");
-
-        // Mostrar caminos
-        System.out.println("Distancias desde el vértice  V1:");
-        for (var vertex : myGraph.getVertexs()) {
-            System.out.print(vertex.getInfo());
-            for (var pa : paths.get(vertex)) {
-                System.out.print("  " + pa.getInfo() + " |  ");
-            }
-
-            System.out.println();
-        }
-
-        // Probar cache
-        var paths0 = myGraph.dijkstra("V1");
-
-        // Mostrar caminos
-        System.out.println("Distancias desde el vértice  V1:");
-        for (var vertex : myGraph.getVertexs()) {
-            System.out.print(vertex.getInfo());
-            for (var pa : paths0.get(vertex)) {
-                System.out.print("  " + pa.getInfo() + " |  ");
-            }
-
-            System.out.println();
-        }
+        show_dijkstra(myGraph, "V1");
 
         // Probar cache con cambios
-        myGraph.addEdge("V1", "V6", 5);
-        myGraph.addEdge("V6", "V3", 7);
-        myGraph.addEdge("V7", "V4", 8);
-        myGraph.addEdge("V2", "V5", 6);
-        myGraph.addEdge("V4", "V2", 9);
-        myGraph.addEdge("V6", "V2", 5);
-        myGraph.addEdge("V5", "V6", 5);
-        var paths1 = myGraph.dijkstra("V1");
+        myGraph.addEdge("V1", "V6", 7);
+        myGraph.addEdge("V3", "V6", 5);
+        myGraph.addEdge("V2", "V6", 5);
+        myGraph.addEdge("V2", "V6", -5);
 
-        // Mostrar caminos
-        System.out.println("Distancias desde el vértice  V1:");
-        for (var vertex : myGraph.getVertexs()) {
-            System.out.print(vertex.getInfo());
-            for (var pa : paths1.get(vertex)) {
-                System.out.print("  " + pa.getInfo() + " |  ");
-            }
-
-            System.out.println();
-        }
+        show_dijkstra(myGraph, "V1");
     }
 }
