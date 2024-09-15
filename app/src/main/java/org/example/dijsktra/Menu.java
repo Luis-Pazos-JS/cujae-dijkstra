@@ -5,12 +5,13 @@ import java.util.*;
 public class Menu {
     Scanner scanner = new Scanner(System.in);
     public Menu(){
-        int options=0;
+        int options;
         System.out.println("-------------- Menu de Grafo -------------");
         System.out.println("1 : Crear grafo aleatorio");
         System.out.println("2 : Crear grafo definido");
 
         options = scanner.nextInt();
+        scanner.nextLine();
         Graph<String> myGraph = new Graph<>();
 
         if(options == 2){
@@ -33,9 +34,19 @@ public class Menu {
         }
         System.out.println("1 : anadir arista");
         System.out.println("2 : anadir vertice");
-        System.out.println("3 : mostrar grafo");
+        System.out.print("3 : mostrar grafo");
 
-        options = scanner.nextInt();
+
+        // Verificar que la entrada es un número
+        if (scanner.hasNextInt()) {
+            options = scanner.nextInt();
+            scanner.nextLine();  // Consumir el salto de línea pendiente
+        } else {
+            System.out.println("Entrada no válida.");
+            return;
+        }
+        
+
         if(options == 2){
             
         }

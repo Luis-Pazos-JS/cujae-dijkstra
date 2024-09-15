@@ -3,7 +3,10 @@
  */
 package org.example;
 
+import java.util.Scanner;
+
 import org.example.dijsktra.Graph;
+import org.example.dijsktra.Menu;
 
 public class App {
 
@@ -11,6 +14,8 @@ public class App {
         Graph<String> myGraph = new Graph<>();
         int nVector = 5;
         int nEdges = 10;
+
+        
 
         //myGraph.initializeGraph(nVector, nEdges);
 
@@ -68,50 +73,5 @@ public class App {
         System.out.println();
         var paths = myGraph.dijkstra("V1");
 
-        // Mostrar caminos
-        System.out.println("Distancias desde el vértice  V1:");
-        for (var vertex : myGraph.getVertexs()) {
-            System.out.print(vertex.getInfo());
-            for (var pa : paths.get(vertex)) {
-                System.out.print("  " + pa.getInfo() + " |  ");
-            }
-
-            System.out.println();
-        }
-
-        // Probar cache
-        var paths0 = myGraph.dijkstra("V1");
-
-        // Mostrar caminos
-        System.out.println("Distancias desde el vértice  V1:");
-        for (var vertex : myGraph.getVertexs()) {
-            System.out.print(vertex.getInfo());
-            for (var pa : paths0.get(vertex)) {
-                System.out.print("  " + pa.getInfo() + " |  ");
-            }
-
-            System.out.println();
-        }
-
-        // Probar cache con cambios
-        myGraph.addEdge("V1", "V6", 5);
-        myGraph.addEdge("V6", "V3", 7);
-        myGraph.addEdge("V7", "V4", 8);
-        myGraph.addEdge("V2", "V5", 6);
-        myGraph.addEdge("V4", "V2", 9);
-        myGraph.addEdge("V6", "V2", 5);
-        myGraph.addEdge("V5", "V6", 5);
-        var paths1 = myGraph.dijkstra("V1");
-
-        // Mostrar caminos
-        System.out.println("Distancias desde el vértice  V1:");
-        for (var vertex : myGraph.getVertexs()) {
-            System.out.print(vertex.getInfo());
-            for (var pa : paths1.get(vertex)) {
-                System.out.print("  " + pa.getInfo() + " |  ");
-            }
-
-            System.out.println();
-        }
     }
 }
