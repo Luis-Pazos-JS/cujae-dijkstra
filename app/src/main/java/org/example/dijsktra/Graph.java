@@ -5,6 +5,10 @@ import java.util.*;
 public class Graph<T> {
 
     private LinkedList<Vertex<T>> listVertex;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 11d959f (creando menu)
 
     private HashMap<
         Vertex<T>,
@@ -16,6 +20,10 @@ public class Graph<T> {
 
     public Graph() {
         listVertex = new LinkedList<>();
+<<<<<<< HEAD
+=======
+
+>>>>>>> 11d959f (creando menu)
         vCant = 0;
         eCant = 0;
         dijkstraCache = new HashMap<>();

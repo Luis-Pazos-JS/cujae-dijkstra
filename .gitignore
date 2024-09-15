@@ -1,2 +1,3 @@
 .class
 .gradle
+app/bin/main/org/example/dijsktra/Graph.class
