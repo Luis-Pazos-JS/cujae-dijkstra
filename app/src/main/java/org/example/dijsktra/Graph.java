@@ -5,16 +5,17 @@ import java.util.*;
 public class Graph<T> {
 
     private LinkedList<Vertex<T>> listVertex;
-    private LinkedList<Edge<T>> listEdges;
 
-    private Map<Vertex<T>, Map<Vertex<T>, List<Vertex<T>>>> dijkstraCache;
+    private HashMap<
+        Vertex<T>,
+        HashMap<Vertex<T>, Pair<Integer, LinkedList<Vertex<T>>>>
+    > dijkstraCache;
     private boolean isChangedCache;
 
     public int vCant, eCant;
 
     public Graph() {
         listVertex = new LinkedList<>();
-        listEdges = new LinkedList<>();
         vCant = 0;
         eCant = 0;
         dijkstraCache = new HashMap<>();
@@ -74,7 +75,9 @@ public class Graph<T> {
         return listVertex;
     }
 
-    public Map<Vertex<T>, List<Vertex<T>>> dijkstra(T init) {
+    public HashMap<Vertex<T>, Pair<Integer, LinkedList<Vertex<T>>>> dijkstra(
+        T init
+    ) {
         Vertex<T> startVertex = findVertex(init);
         // TODO: check if startVertex is null, raise exception
         if (startVertex == null) {
@@ -82,10 +85,13 @@ public class Graph<T> {
         }
 
         if (!isChangedCache && dijkstraCache.containsKey(startVertex)) {
-            System.out.println("dijkstraCache");
             return dijkstraCache.getOrDefault(startVertex, new HashMap<>());
         }
 
+        var path = new HashMap<
+            Vertex<T>,
+            Pair<Integer, LinkedList<Vertex<T>>>
+        >();
         Map<Vertex<T>, Integer> distances = new HashMap<>();
         Map<Vertex<T>, Vertex<T>> previus = new HashMap<>();
 
@@ -96,8 +102,13 @@ public class Graph<T> {
         for (Vertex<T> vertex : listVertex) {
             if (vertex.equals(startVertex)) {
                 distances.put(vertex, 0);
+                //path.put(vertex, new Pair<>(0, new LinkedList<>()));
             } else {
                 distances.put(vertex, Integer.MAX_VALUE);
+                //path.put(
+                //    vertex,
+                //    new Pair<>(Integer.MAX_VALUE, new LinkedList<>())
+                //);
             }
             pq.add(vertex);
         }
@@ -107,10 +118,10 @@ public class Graph<T> {
 
             for (Edge<T> edge : current.getEdgeList()) {
                 Vertex<T> neighbor = edge.getDestiny();
-                int newDist = distances.get(current) + edge.getWeight();
+                int dist = distances.get(current) + edge.getWeight();
 
-                if (newDist < distances.get(neighbor)) {
-                    distances.put(neighbor, newDist);
+                if (dist < distances.get(neighbor)) {
+                    distances.put(neighbor, dist);
                     previus.put(neighbor, current);
                     pq.remove(neighbor);
                     pq.add(neighbor);
@@ -118,9 +129,9 @@ public class Graph<T> {
             }
         }
 
-        Map<Vertex<T>, List<Vertex<T>>> path = new HashMap<>();
         for (Vertex<T> end : listVertex) {
-            path.put(end, reconstructionList(previus, startVertex, end));
+            var reconstructed = reconstructionList(previus, startVertex, end);
+            path.put(end, new Pair<>(distances.get(end), reconstructed));
         }
 
         dijkstraCache.put(startVertex, path);
@@ -128,12 +139,12 @@ public class Graph<T> {
         return path;
     }
 
-    private List<Vertex<T>> reconstructionList(
+    private LinkedList<Vertex<T>> reconstructionList(
         Map<Vertex<T>, Vertex<T>> previous,
         Vertex<T> start,
         Vertex<T> end
     ) {
-        List<Vertex<T>> path = new LinkedList<>();
+        var path = new LinkedList<Vertex<T>>();
 
         if (!previous.containsKey(end) && !start.equals(end)) return path;
 
@@ -141,7 +152,7 @@ public class Graph<T> {
             Vertex<T> vertex = end;
             vertex != null;
             vertex = previous.get(vertex)
-        ) path.add(0, vertex);
+        ) path.add(vertex);
 
         return path;
     }
